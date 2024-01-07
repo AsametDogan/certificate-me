@@ -1,11 +1,13 @@
 import { Types } from "mongoose";
 
-export default interface ICertificate extends Document {
+interface Certificate {
     _id?: Types.ObjectId | null
+    ownerId: Types.ObjectId;
     title: string;
     certificateImg: string;
-    ownerId: Types.ObjectId;
     createdDate: Date;
     isActive: boolean;
-    expirationDate?: Date | null;
+    category: string
 }
+
+export default Certificate

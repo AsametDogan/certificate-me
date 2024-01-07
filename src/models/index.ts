@@ -1,7 +1,7 @@
 import UserModel from "./UserModel";
+import VerificationModel from "./VerificationModel";
 import AssignmentModel from "./AssignmentModel";
-import VerificationModel from "./VerificationModel"
-
+import CertificateModel from "./CertificateModel";
 export {
-    UserModel, AssignmentModel, VerificationModel
+    UserModel, AssignmentModel, CertificateModel, VerificationModel
 }

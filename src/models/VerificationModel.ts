@@ -1,13 +1,15 @@
 import mongoose, { Schema } from "mongoose";
-import IVerification from "../interfaces/verification.interface";
+import { Verification } from "../interfaces";
 
-const VerificationSchema = new Schema<IVerification>({
-   email: { type: String, required: true },
-   verificationCode: { type: String, required: true },
-   verified: { type: Boolean, require: false },
-   createdDate: { type: Date, required: true },
+interface VerificationDoc extends Verification, Document { }
+
+const VerificationSchema: Schema<VerificationDoc> = new Schema({
+    email: { type: String, required: true },
+    verified: { type: Boolean, required: true },
+    verificationCode: { type: String, required: true },
+    createdDate: { type: Date, default: Date.now },
 });
 
-const VerificationModel = mongoose.model<IVerification>('Verification', VerificationSchema);
+const VerificationModel = mongoose.model<VerificationDoc>('Verification', VerificationSchema);
 
-export default VerificationModel
+export default VerificationModel;

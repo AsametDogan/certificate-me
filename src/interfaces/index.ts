@@ -1,11 +1,11 @@
-import IRequestWithUser from "./reqWithUser.interface";
-import IAssignment from "./assignment.interface";
-import ICertificate from "./certificate.interface";
-import IUser from "./user.interface";
-import IDataToken from "./dataToken.interface";
-import IVerification from "./verification.interface";
-import IRequestWithFile from "./reqWithFile.interface";
+import User from "./User";
+import RequestWithUser from "./RequestWithUser";
+import Token from "./Token";
+import Certificate from "./Certificate";
+import Assignment from "./Assignment";
+import Verification from "./Verification";
+
 
 export {
-    IAssignment, ICertificate, IRequestWithUser, IUser, IDataToken, IVerification, IRequestWithFile
+    User, RequestWithUser, Token, Certificate, Assignment, Verification
 }

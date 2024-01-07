@@ -1,15 +1,18 @@
 import mongoose, { Schema } from "mongoose";
-import { IAssignment } from "../interfaces";
+import { Assignment } from "../interfaces";
 
-const AssignmentSchema: Schema<IAssignment> = new Schema({
+interface AssignmentDoc extends Assignment, Document {}
 
-    description: { type: String, required: false },
-    senderId: { type: mongoose.Schema.Types.ObjectId, required: true },
-    receiverInfo: { type: String, required: true },
-    certificateId: { type: mongoose.Schema.Types.ObjectId, required: true },
-    assignDate: { type: Date, required: true }
+const AssignmentSchema: Schema<AssignmentDoc> = new Schema({
+  senderId: { type: Schema.Types.ObjectId, required: true },
+  certificateId: { type: Schema.Types.ObjectId, required: true },
+  receiverInfo: { type: String, required: true },
+  description: { type: String, default: null },
+  assignDate: { type: Date, default: Date.now },
+  expireDate: { type: Date, default: null },
+  isActive: { type: Boolean, default: true },
 });
 
-const AssignmentModel = mongoose.model<IAssignment>('Assignment', AssignmentSchema);
+const AssignmentModel = mongoose.model<AssignmentDoc>('Assignment', AssignmentSchema);
 
-export default AssignmentModel
+export default AssignmentModel;

@@ -1,15 +1,17 @@
 import mongoose, { Schema } from "mongoose";
-import { ICertificate } from "../interfaces";
+import { Certificate } from "../interfaces";
 
+interface CertificateDoc extends Certificate, Document { }
 
-const CertificateSchema: Schema<ICertificate> = new Schema({
+const CertificateSchema: Schema<CertificateDoc> = new Schema({
+    ownerId: { type: Schema.Types.ObjectId, required: true },
     title: { type: String, required: true },
     certificateImg: { type: String, required: true },
+    category: { type: String, required: true },
     createdDate: { type: Date, default: Date.now },
     isActive: { type: Boolean, default: true },
-    expirationDate: {type: Date, required: false}
 });
 
-const CertificateModel = mongoose.model<ICertificate>('Certificate', CertificateSchema);
+const CertificateModel = mongoose.model<CertificateDoc>('Certificate', CertificateSchema);
 
-export default CertificateModel;
+export default CertificateModel
