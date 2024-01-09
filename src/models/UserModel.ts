@@ -3,7 +3,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { User } from '../interfaces';
 
-interface UserDoc extends User, Document { }
+interface UserDoc extends User { }
 
 const UserSchema: Schema<UserDoc> = new Schema({
     

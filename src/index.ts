@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import database from './config/database';
+import userRouter from './routes/userRoutes';
 //import routes from './routes';
 //const admin = require('firebase-admin');
 const https = require('https');
@@ -32,15 +33,21 @@ database.connect()
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'))
-//app.use('/api', routes);
+app.get("/sakso",(req,res)=>{
+    return res.status(200).json("saksoo")
+}) 
+app.use('/api/user', userRouter);
+
 //app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerOutput));
 
 const PORT = process.env.PORT || 5001;
 
+app.listen(PORT,()=>{
+    console.log("bağlandı")
+})
 
+// const httpsServer = https.createServer(app);
 
-const httpsServer = https.createServer(app);
-
-httpsServer.listen(PORT, () => {
-    console.log('HTTPS Server running on port ' + PORT);
-});
+// httpsServer.listen(PORT, () => {
+//     console.log('HTTPS Server running on port ' + PORT);
+// });

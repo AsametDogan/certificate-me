@@ -19,7 +19,7 @@ class UserController {
             email = Standardization.trim(email)
             phone = Standardization.phone(phone)
 
-            if (Validation.email(email)) {
+            if (!Validation.email(email)) {
 
                 return res.status(409).json({
                     message: `${email} mail formatında olmalıdır`, success: false
@@ -45,7 +45,7 @@ class UserController {
             });
 
             await user.save();
-            const token = jwt.sign({ _id: user._id, role: user.role }, process.env.TOKEN_SECRET || '');
+            const token = jwt.sign({ _id: user._id, role: user.role }, process.env.SECRET_TOKEN || '');
 
             res.status(201).json({ data: { token, user }, success: true, message: "Kayıt Başarılı" });
 
@@ -74,7 +74,7 @@ class UserController {
                 return res.status(400).json({ message: "Şifre hatalı", success: false });
             }
 
-            const token = jwt.sign({ _id: user._id, role: user.role }, process.env.TOKEN_SECRET || '');
+            const token = jwt.sign({ _id: user._id, role: user.role }, process.env.SECRET_TOKEN || '');
 
             res.status(200).json({ data: { token, user }, success: true, message: "Giriş Başarılı" });
         } catch (error) {

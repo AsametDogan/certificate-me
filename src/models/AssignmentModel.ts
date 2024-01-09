@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import { Assignment } from "../interfaces";
 
-interface AssignmentDoc extends Assignment, Document {}
+interface AssignmentDoc extends Assignment {}
 
 const AssignmentSchema: Schema<AssignmentDoc> = new Schema({
   senderId: { type: Schema.Types.ObjectId, required: true },

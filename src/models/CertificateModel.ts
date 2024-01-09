@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import { Certificate } from "../interfaces";
 
-interface CertificateDoc extends Certificate, Document { }
+interface CertificateDoc extends Certificate { }
 
 const CertificateSchema: Schema<CertificateDoc> = new Schema({
     ownerId: { type: Schema.Types.ObjectId, required: true },

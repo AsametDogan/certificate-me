@@ -1,7 +1,7 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema,Document } from "mongoose";
 import { Verification } from "../interfaces";
 
-interface VerificationDoc extends Verification, Document { }
+interface VerificationDoc extends Verification { }
 
 const VerificationSchema: Schema<VerificationDoc> = new Schema({
     email: { type: String, required: true },
