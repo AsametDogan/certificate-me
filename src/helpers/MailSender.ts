@@ -39,7 +39,7 @@ class MailSender {
             });
             const mailOptions: MailOptions = {
                 from: {
-                    name: "Rozetle Bence",
+                    name: "Certificate Me",
                     address: process.env.EMAIL_ADRESS || ""
                 },
                 to: email,

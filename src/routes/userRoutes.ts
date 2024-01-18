@@ -17,11 +17,10 @@ userRouter.post('/register',uploadProfile.single('profileImg'), userController.r
 userRouter.post('/login', userController.login);
 
 userRouter.get("/:_id",userController.getUserInfo)
-userRouter.post("/setpass",userController.setNewPass)
-userRouter.delete("/delete",authMiddleware(["user"]),userController.deleteProfile)
-userRouter.put("/update",authMiddleware(["user"]),userController.updateProfile)
+userRouter.delete("/delete",authMiddleware(["0"]),userController.deleteProfile)
+userRouter.put("/update",authMiddleware(["0"]), uploadProfile.single('profileImg'), userController.updateProfile)
 
-userRouter.post("/changeRole",userController.changeRole)
+userRouter.post("/changeRole",authMiddleware(["2"]), userController.changeRole)
 
 
 

@@ -7,6 +7,7 @@ const VerificationSchema: Schema<VerificationDoc> = new Schema({
     email: { type: String, required: true },
     verified: { type: Boolean, required: true },
     verificationCode: { type: String, required: true },
+    verificationDate:{type:Date, required:false},
     createdDate: { type: Date, default: Date.now },
 });
 

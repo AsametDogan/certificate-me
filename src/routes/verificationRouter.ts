@@ -11,6 +11,8 @@ const verificationController = new VerificationController();
 verificationRoutes.post('/sendRegister', verificationController.sendCodeRegister);
 verificationRoutes.post('/sendForget', verificationController.sendCodeToForgottenMail);
 verificationRoutes.post('/verify', verificationController.verifyCode);
+verificationRoutes.post("/setpass",verificationController.setNewPass)
+
 
 
 

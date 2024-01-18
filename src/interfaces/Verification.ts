@@ -6,6 +6,8 @@ interface Verification {
     verified: boolean,
     verificationCode: string,
     createdDate: Date;
+    verificationDate?: Date|null;
+    
 }
 
 export default Verification

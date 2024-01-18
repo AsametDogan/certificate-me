@@ -23,7 +23,7 @@ class CertificateController {
                 ownerId: userId,
                 title,
                 category,
-                certificateImg: `https://rozetle.com:5001/api/image/certificate/${req.file?.filename}`,
+                certificateImg: `http://localhost:8000/api/image/certificate/${req.file?.filename}`,
                 createdDate: new Date(),
                 isActive: true
             })

@@ -25,6 +25,9 @@ export const authMiddleware = (allowedRoles: string[]) => {
         return res.status(403).json({ error: 'Forbidden - Insufficient permissions' });
       }
       const foundUser = await UserModel.findById(decoded._id)
+      console.log("-----------------")
+      console.log({foundUser, message:"Boş birşeyler"})
+
       if (!foundUser) {
         return res.status(404).json({ function: "authMiddleware", success: false, message: "Kullanıcı bulunamadı" })
       }

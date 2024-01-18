@@ -29,7 +29,9 @@ class AssignmentController {
             return res.status(404).json({ message: 'Sertifika Bulunamadı', success: false });
         }
 
-        if (certificate.ownerId !== user._id) {
+        if (certificate.ownerId.toString() !== user._id.toString()) {
+            console.log(certificate.ownerId.toString())
+
             return res.status(400).json({ message: 'Bu sertifika size ait değil', success: false });
         }
 
@@ -57,9 +59,19 @@ class AssignmentController {
     }
     getMySent = async (req: Request, res: Response) => {
         const user = (req as RequestWithUser).user
-
+        console.log(user)
         try {
             const assignments = await AssignmentModel.find({ senderId: user._id })
+            .populate({
+                path: 'certificateId',
+                model: 'Certificate', // Certificate model adı
+            })
+            .populate({
+                path: 'senderId',
+                model: 'User', // User model adı
+                select: ' name surname email profileImg',
+            });
+            console.log(assignments)
             return res.status(200).json({ message: "Sertifikalar başarıyla getirildi", success: true, data: assignments })
         } catch (error) {
             console.log({ function: "getMyCertificate", error })

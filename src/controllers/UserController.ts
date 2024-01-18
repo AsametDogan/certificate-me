@@ -26,7 +26,10 @@ class UserController {
                     message: `${email} mail formatında olmalıdır`, success: false
                 })
             }
-
+            const verifiedEmail = await VerificationModel.findOne({email})
+            if(!verifiedEmail){
+                return res.status(400).json({ message: `${email} doğrulanmamış mail`, success: false });
+            }
             const existingUser = await UserModel.findOne({ email: { $in: [email] } });
             if (existingUser) {
 
@@ -41,7 +44,7 @@ class UserController {
                 phone,
                 role: "0",
                 password: hashedPassword,
-                profileImg: `http://localhost:5000/api/image/profile/${req.file?.filename}`,
+                profileImg: `http://localhost:8000/api/image/profile/${req.file?.filename}`,
                 createdDate: new Date(),
             });
 
@@ -58,14 +61,14 @@ class UserController {
     login = async (req: Request, res: Response) => {
         let { email, password } = req.body;
         email = Standardization.trim(email)
-        if (Validation.email(email)) {
+        if (!Validation.email(email)) {
 
             return res.status(409).json({
                 message: `${email} mail formatında olmalıdır`, success: false
             })
         }
         try {
-            const user = await UserModel.findOne({ email: { $in: [email] } });
+            const user = await UserModel.findOne({ email: { $in: [email] }});
             if (!user) {
                 return res.status(400).json({ message: `${email} ile bir hesap bulunamadı`, success: false });
             }
@@ -76,8 +79,8 @@ class UserController {
             }
 
             const token = jwt.sign({ _id: user._id, role: user.role }, process.env.SECRET_TOKEN || '');
-
-            res.status(200).json({ data: { token, user }, success: true, message: "Giriş Başarılı" });
+            const userInfo = {_id: user._id, name: user.name, email: user.email, phone: user.phone, profileImg: user.profileImg, role: user.role, createdDate: user.createdDate};
+            res.status(200).json({ data: { token, user: userInfo}, success: true, message: "Giriş Başarılı" });
         } catch (error) {
             res.status(500).json({ message: "Giriş yapma sırasında hata meydana geldi", success: false, data: error });
         }
@@ -87,12 +90,40 @@ class UserController {
     getUserInfo = async (req: Request, res: Response) => {
         const { _id } = req.params;
         try {
-            const user = await UserModel.findById(_id, '-password -createdData -isActive -phone') as User;
+            const user = await UserModel.findById(_id, '-password -createdDate -isActive -role -__v') as User;
             if (!user) {
                 return res.status(404).json({ message: "Kullanıcı bulunamadı.", success: false });
             }
+            let assignments:any = [];
+            try {
+              let mailAssign = await AssignmentModel.find({ receiverInfo: ({ $in: user.email }) })
+                    .populate({
+                        path: 'certificateId',
+                        model: 'Certificate', // Certificate model adı
+                    })
+                    .populate({
+                        path: 'senderId',
+                        model: 'User', // User model adı
+                        select: ' name surname email profileImg',
+                    });
+                let phoneAssign = await AssignmentModel.find({ receiverInfo: user.phone })
+                    .populate({
+                        path: 'certificateId',
+                        model: 'Certificate', // Certificate model adı
+                    })
+                    .populate({
+                        path: 'senderId',
+                        model: 'User', // User model adı
+                        select: 'name surname email profileImg',
+                    });
+                assignments = [...mailAssign, ...phoneAssign]    
+                
+            } catch (error) {
+                console.log({ function: "getMyCertificate", error })
+                return res.status(500).json({ message: "Sertifikalar getirilirken hata meydana geldi", success: false, data: error })
+            }
             return res.status(200).json({
-                data: user, success: true, message: `Kullanıcı bilgileri başarıyla getirildi`
+                data: {user,certificates: assignments}, success: true, message: `Kullanıcı bilgileri başarıyla getirildi`
             })
 
 
@@ -107,31 +138,7 @@ class UserController {
     }
 
 
-    setNewPass = async (req: Request, res: Response) => {
-        let { email, newPass } = req.body
-        email = email.toLowerCase().trim();
-        const hashedPassword = await bcrypt.hash(newPass, 10);
-        try {
-            const user = await UserModel.findOne({ email: { $in: [email] } });
-            if (!user) {
-                return res.status(401).json({ message: `${email} ile ilişkilendirilmiş hesap bulunamadı`, success: false });
-            }
-
-            const verification = await VerificationModel.findOne({ email })
-            if (!verification) {
-                return res.status(404).json({ message: "Doğrulama bilgisi bulunamadı, daha sonra tekrar deneyin", success: false });
-            }
-            if (verification.verified = false) {
-                return res.status(403).json({ message: "Doğrulanmamış işlem, lütfen tekrar deneyiniz", success: false })
-            }
-
-            user.password = hashedPassword
-            await user.save()
-            return res.status(200).json({ message: "Şifre değiştirme başarılı", success: true })
-        } catch (error) {
-            return res.status(500).json({ message: "Şifre yenilemede bir hata meydana geldi", success: false });
-        }
-    }
+    
 
     deleteProfile = async (req: Request, res: Response) => {
         const userId = (req as RequestWithUser).user?._id;
@@ -142,6 +149,9 @@ class UserController {
 
         try {
             const deletedUser: any = await UserModel.findById(userId)
+            if(deletedUser.email.length === 0){
+                return res.status(404).json({ message: 'Kullanıcı bulunamadı', success: false });
+            }
             deletedUser.email = []
             deletedUser.isActive = false
             await deletedUser.save()
@@ -151,8 +161,6 @@ class UserController {
             }
 
             //  await AssignmentModel.deleteMany({ senderId: userId })
-
-
 
             res.status(200).json({ message: 'Kullanıcı başarıyla silindi', success: true });
         } catch (error) {
@@ -169,20 +177,20 @@ class UserController {
         }
         try {
             const { name, surname, password, phone, profileImg } = req.body;
-
+            let updatedUser;
             if (req.file?.filename) {
-                await UserModel.findByIdAndUpdate(
+                updatedUser = await UserModel.findByIdAndUpdate(
                     userId,
                     {
                         name: Standardization.trim(name),
                         surname: Standardization.trim(surname),
                         phone: Standardization.trim(phone),
-                        profileImg: req.file?.filename ? `http://localhost:5000/api/image/profile/${req.file?.filename}` : null,
+                        profileImg: req.file?.filename ? `http://localhost:8000/api/image/profile/${req.file?.filename}` : null,
                     },
                     { new: true, select: '-password' } // Güncellenmiş kullanıcıyı döndür ve şifreyi hariç tut
                 );
             } else {
-                await UserModel.findByIdAndUpdate(
+                updatedUser = await UserModel.findByIdAndUpdate(
                     userId,
                     {
                         name: Standardization.trim(name),
@@ -193,7 +201,7 @@ class UserController {
                 );
             }
 
-            res.status(200).json({ data: null, message: "Güncelleme başarılı", success: true });
+            res.status(200).json({ data: updatedUser, message: "Güncelleme başarılı", success: true });
         } catch (error) {
             console.log({ location: "updateProfile", error })
             res.status(500).json({ message: 'Kullanıcı güncellenirken bir hata oluştu', success: false });
