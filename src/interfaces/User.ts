@@ -7,7 +7,7 @@ interface User {
     email: string[];
     phone: string;
     password: string;
-    profileImg: string;
+    profileImg?: string|null;
     role: string;
     createdDate: Date;
     isActive: boolean;

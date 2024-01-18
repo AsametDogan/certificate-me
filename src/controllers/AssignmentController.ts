@@ -7,16 +7,16 @@ import Validation from "../helpers/Validation"
 
 
 class AssignmentController {
-    send = async (req: RequestWithUser, res: Response) => {
-        const userId = req.user._id
+    send = async (req: Request, res: Response) => {
+        const user = (req as RequestWithUser).user
         let { receiverInfo, certificateId, description, expireDate } = req.body
 
         const existingAssignment: Assignment | null = await AssignmentModel.findOne({
-            senderId: userId,
+            senderId: user._id,
             certificateId,
             receiverInfo
         })
-        if (req.user?.email.includes(receiverInfo) || req.user?.phone === receiverInfo) {
+        if (user?.email.includes(receiverInfo) || user?.phone === receiverInfo) {
             return res.status(400).json({ message: 'Kendinize sertifika atayamazsınız', success: false });
 
         }
@@ -29,7 +29,7 @@ class AssignmentController {
             return res.status(404).json({ message: 'Sertifika Bulunamadı', success: false });
         }
 
-        if (certificate.ownerId !== userId) {
+        if (certificate.ownerId !== user._id) {
             return res.status(400).json({ message: 'Bu sertifika size ait değil', success: false });
         }
 
@@ -40,7 +40,7 @@ class AssignmentController {
         }
         try {
             const assignment = new AssignmentModel({
-                senderId: userId,
+                senderId: user._id,
                 certificateId,
                 receiverInfo,
                 description,
@@ -55,10 +55,11 @@ class AssignmentController {
             return res.status(500).json({ message: "Sertifika gönderilirken hata meydana geldi", success: false, data: error })
         }
     }
-    getMySent = async (req: RequestWithUser, res: Response) => {
-        const userId = req.user._id
+    getMySent = async (req: Request, res: Response) => {
+        const user = (req as RequestWithUser).user
+
         try {
-            const assignments = await AssignmentModel.find({ senderId: userId })
+            const assignments = await AssignmentModel.find({ senderId: user._id })
             return res.status(200).json({ message: "Sertifikalar başarıyla getirildi", success: true, data: assignments })
         } catch (error) {
             console.log({ function: "getMyCertificate", error })
@@ -66,9 +67,11 @@ class AssignmentController {
         }
     }
 
-    getMyReceived = async (req: RequestWithUser, res: Response) => {
-        const receiverEmails = req.user.email
-        const receiverPhone = req.user.phone
+    getMyReceived = async (req: Request, res: Response) => {
+        const user = (req as RequestWithUser).user
+
+        const receiverEmails = user.email
+        const receiverPhone = user.phone
         try {
             let mailAssign = await AssignmentModel.find({ receiverInfo: ({ $in: receiverEmails }) })
                 .populate({
@@ -103,6 +106,6 @@ class AssignmentController {
         }
     }
 
-  
+
 }
 export default AssignmentController

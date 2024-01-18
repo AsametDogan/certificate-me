@@ -5,8 +5,9 @@ import { CertificateModel } from "../models";
 
 
 class CertificateController {
-    create = async (req: RequestWithUser, res: Response) => {
-        const userId = req.user._id;
+    create = async (req: Request, res: Response) => {
+        const userId = (req as RequestWithUser).user?._id;
+
         const { title, category } = req.body
 
         if (!title || !category) {
@@ -33,8 +34,9 @@ class CertificateController {
         }
     }
 
-    getMyCreated = async (req: RequestWithUser, res: Response) => {
-        const userId = req.user._id;
+    getMyCreated = async (req: Request, res: Response) => {
+        const userId = (req as RequestWithUser).user?._id;
+
         try {
             const certificates = await CertificateModel.find({ ownerId: userId })
             return res.status(200).json({ message: "Sertifikalar başarıyla getirildi", success: true, data: certificates })

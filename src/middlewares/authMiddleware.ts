@@ -3,9 +3,11 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { RequestWithUser, Token } from '../interfaces';
+import { UserModel } from '../models';
 
 export const authMiddleware = (allowedRoles: string[]) => {
-  return async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+
     const token = req.header('Authorization');
 
     if (!token) {
@@ -22,8 +24,11 @@ export const authMiddleware = (allowedRoles: string[]) => {
       if (!allowedRoles.includes(decoded.role)) {
         return res.status(403).json({ error: 'Forbidden - Insufficient permissions' });
       }
-
-      req.userId = decoded._id;
+      const foundUser = await UserModel.findById(decoded._id)
+      if (!foundUser) {
+        return res.status(404).json({ function: "authMiddleware", success: false, message: "Kullanıcı bulunamadı" })
+      }
+      (req as RequestWithUser).user = foundUser;
       next();
     } catch (error) {
       return res.status(401).json({ error: 'Unauthorized - Invalid token' });

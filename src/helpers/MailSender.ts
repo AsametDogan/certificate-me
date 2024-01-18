@@ -18,7 +18,7 @@ class MailSender {
             await transporter.sendMail(mailOptions);
             return true;
         } catch (error: any) {
-            console.log("Mail Gönderilemedi: " + error.message)
+            console.log("Mail Gönderilemedi: " + error)
             return false;
         }
     }
@@ -51,7 +51,7 @@ class MailSender {
             return result
 
         } catch (error) {
-            console.log("Create Transport is failed: " + error.message)
+            console.log("Create Transport is failed: " + error)
             return false
         }
     }

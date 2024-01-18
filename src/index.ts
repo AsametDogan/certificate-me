@@ -3,6 +3,10 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import database from './config/database';
 import userRouter from './routes/userRoutes';
+import verificationRoutes from './routes/verificationRouter';
+import certificateRouter from './routes/certificateRoutes';
+import assignmentRoutes from './routes/assignmentRoutes';
+import imageRouter from './routes/imageRoutes';
 //import routes from './routes';
 //const admin = require('firebase-admin');
 const https = require('https');
@@ -33,17 +37,23 @@ database.connect()
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'))
-app.get("/sakso",(req,res)=>{
-    return res.status(200).json("saksoo")
-}) 
+
 app.use('/api/user', userRouter);
+app.use('/api/verification', verificationRoutes)
+app.use('/api/certificate', certificateRouter)
+app.use('/api/assign', assignmentRoutes)
+app.use('/api/image', imageRouter)
+app.get('/', (req, res) => {
+    return res.send("sdds")
+})
+
 
 //app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerOutput));
 
 const PORT = process.env.PORT || 5001;
 
-app.listen(PORT,()=>{
-    console.log("bağlandı")
+app.listen(PORT, () => {
+    console.log(PORT + " portuna bağlandı")
 })
 
 // const httpsServer = https.createServer(app);

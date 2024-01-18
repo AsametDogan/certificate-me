@@ -12,10 +12,12 @@ const UserSchema: Schema<UserDoc> = new Schema({
     email: [{ type: String, required: true, unique: true }],
     phone: { type: String, required: true },
     password: { type: String, required: true },
-    profileImg: { type: String, required: true },
-    role: { type: String, required: true },
+    //set profileImg nullable
+
+    profileImg: { type: String, required: false },
+    role: { type: String, required: false,default:"user" },
     createdDate: { type: Date, default: Date.now },
-    isActive: { type: Boolean, default: true },
+    isActive: { type: Boolean, default: true},
 });
 
 const UserModel = mongoose.model<UserDoc>('User', UserSchema);

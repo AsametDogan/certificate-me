@@ -13,6 +13,7 @@ import Validation from "../helpers/Validation";
 class UserController {
     register = async (req: Request, res: Response) => {
         let { name, surname, email, password, phone } = req.body
+        console.log(name, surname, email, password, phone)
         try {
             name = Standardization.trim(name)
             surname = Standardization.trim(surname)
@@ -40,7 +41,7 @@ class UserController {
                 phone,
                 role: "0",
                 password: hashedPassword,
-                profileImg: `https://rozetle.com:5001/api/image/profile/${req.file?.filename}`,
+                profileImg: `http://localhost:5000/api/image/profile/${req.file?.filename}`,
                 createdDate: new Date(),
             });
 
@@ -51,7 +52,7 @@ class UserController {
 
         } catch (error) {
             console.log(error)
-            res.status(500).json({ message: "Kayıt olma sırasında hata meydana geldi", success: false, data: error });
+            res.status(500).json({ message: "Kayıt olma sırasında hata meydana geldi" + error, success: false, data: error });
         }
     }
     login = async (req: Request, res: Response) => {
@@ -132,8 +133,8 @@ class UserController {
         }
     }
 
-    deleteProfile = async (req: RequestWithUser, res: Response) => {
-        const userId = req.user?._id;
+    deleteProfile = async (req: Request, res: Response) => {
+        const userId = (req as RequestWithUser).user?._id;
 
         if (!userId) {
             return res.status(401).json({ message: 'Yetkilendirme hatası', success: false });
@@ -159,8 +160,9 @@ class UserController {
         }
     }
 
-    updateProfile = async (req: RequestWithUser, res: Response) => {
-        const userId = req.user?._id; // Middleware ile eklenen kullanıcı kimliğini al
+    updateProfile = async (req: Request, res: Response) => {
+        const userId = (req as RequestWithUser).user?._id;
+
 
         if (!userId) {
             return res.status(401).json({ message: 'Yetkilendirme hatası', success: false });
@@ -175,7 +177,7 @@ class UserController {
                         name: Standardization.trim(name),
                         surname: Standardization.trim(surname),
                         phone: Standardization.trim(phone),
-                        profileImg: req.file?.filename ? `https://rozetle.com:5001/api/image/profile/${req.file?.filename}` : null,
+                        profileImg: req.file?.filename ? `http://localhost:5000/api/image/profile/${req.file?.filename}` : null,
                     },
                     { new: true, select: '-password' } // Güncellenmiş kullanıcıyı döndür ve şifreyi hariç tut
                 );
@@ -198,7 +200,7 @@ class UserController {
         }
     }
 
-    changeRole = async (req: RequestWithUser, res: Response) => {
+    changeRole = async (req: Request, res: Response) => {
         const { userId, newRole } = req.body
         try {
             const userToUpdate: any = await UserModel.findById(userId)
