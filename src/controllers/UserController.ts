@@ -135,6 +135,23 @@ class UserController {
 
     // search user according to name, surname, emails
     searchUsers = async (req: Request, res: Response) => {
+        try {
+            const { search } = req.query
+            const foundedUsers = await UserModel.find({
+                $or: [
+                    { name: { $regex: search as string, $options: 'i' } },
+                    { surname: { $regex: search as string, $options: 'i' } },
+                    { email: { $regex: search as string, $options: 'i' } },
+                ]
+            }, '-password -createdDate -isActive -role -__v') as User[];
+            return res.status(200).json({
+                data: foundedUsers, success: true, message: `${foundedUsers.length} kullanıcı bulundu`
+            })
+        } catch (error) {
+            console.log({ function: "searchUsers", error })
+            return res.status(500).json({ message: "Sistemsel bir hata oluştu.", success: false })
+
+        }
     }
 
     deleteProfile = async (req: Request, res: Response) => {
