@@ -17,10 +17,10 @@ userRouter.post('/register',uploadProfile.single('profileImg'), userController.r
 userRouter.post('/login', userController.login);
 
 userRouter.get("/:_id",userController.getUserInfo)
-userRouter.delete("/delete",authMiddleware(["0"]),userController.deleteProfile)
-userRouter.put("/update",authMiddleware(["0"]), uploadProfile.single('profileImg'), userController.updateProfile)
-
-userRouter.post("/changeRole",authMiddleware(["2"]), userController.changeRole)
+userRouter.delete("/",authMiddleware(["0"]),userController.deleteProfile)
+userRouter.put("/",authMiddleware(["0"]), uploadProfile.single('profileImg'), userController.updateProfile)
+// Yetkilendirme 2 olarak değiştirilecek
+userRouter.post("/changeRole",authMiddleware(["0"]), userController.changeRole)
 
 
 

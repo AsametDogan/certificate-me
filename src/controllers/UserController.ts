@@ -26,8 +26,8 @@ class UserController {
                     message: `${email} mail formatında olmalıdır`, success: false
                 })
             }
-            const verifiedEmail = await VerificationModel.findOne({email})
-            if(!verifiedEmail){
+            const verifiedEmail = await VerificationModel.findOne({ email })
+            if (!verifiedEmail) {
                 return res.status(400).json({ message: `${email} doğrulanmamış mail`, success: false });
             }
             const existingUser = await UserModel.findOne({ email: { $in: [email] } });
@@ -68,7 +68,7 @@ class UserController {
             })
         }
         try {
-            const user = await UserModel.findOne({ email: { $in: [email] }});
+            const user = await UserModel.findOne({ email: { $in: [email] } });
             if (!user) {
                 return res.status(400).json({ message: `${email} ile bir hesap bulunamadı`, success: false });
             }
@@ -79,8 +79,8 @@ class UserController {
             }
 
             const token = jwt.sign({ _id: user._id, role: user.role }, process.env.SECRET_TOKEN || '');
-            const userInfo = {_id: user._id, name: user.name, email: user.email, phone: user.phone, profileImg: user.profileImg, role: user.role, createdDate: user.createdDate};
-            res.status(200).json({ data: { token, user: userInfo}, success: true, message: "Giriş Başarılı" });
+            const userInfo = { _id: user._id, name: user.name, email: user.email, phone: user.phone, profileImg: user.profileImg, role: user.role, createdDate: user.createdDate };
+            res.status(200).json({ data: { token, user: userInfo }, success: true, message: "Giriş Başarılı" });
         } catch (error) {
             res.status(500).json({ message: "Giriş yapma sırasında hata meydana geldi", success: false, data: error });
         }
@@ -94,9 +94,9 @@ class UserController {
             if (!user) {
                 return res.status(404).json({ message: "Kullanıcı bulunamadı.", success: false });
             }
-            let assignments:any = [];
+            let assignments: any = [];
             try {
-              let mailAssign = await AssignmentModel.find({ receiverInfo: ({ $in: user.email }) })
+                let mailAssign = await AssignmentModel.find({ receiverInfo: ({ $in: user.email }) })
                     .populate({
                         path: 'certificateId',
                         model: 'Certificate', // Certificate model adı
@@ -116,14 +116,14 @@ class UserController {
                         model: 'User', // User model adı
                         select: 'name surname email profileImg',
                     });
-                assignments = [...mailAssign, ...phoneAssign]    
-                
+                assignments = [...mailAssign, ...phoneAssign]
+
             } catch (error) {
                 console.log({ function: "getMyCertificate", error })
                 return res.status(500).json({ message: "Sertifikalar getirilirken hata meydana geldi", success: false, data: error })
             }
             return res.status(200).json({
-                data: {user,certificates: assignments}, success: true, message: `Kullanıcı bilgileri başarıyla getirildi`
+                data: { user, certificates: assignments }, success: true, message: `Kullanıcı bilgileri başarıyla getirildi`
             })
 
 
@@ -137,9 +137,6 @@ class UserController {
     searchUsers = async (req: Request, res: Response) => {
     }
 
-
-    
-
     deleteProfile = async (req: Request, res: Response) => {
         const userId = (req as RequestWithUser).user?._id;
 
@@ -149,7 +146,7 @@ class UserController {
 
         try {
             const deletedUser: any = await UserModel.findById(userId)
-            if(deletedUser.email.length === 0){
+            if (deletedUser.email.length === 0) {
                 return res.status(404).json({ message: 'Kullanıcı bulunamadı', success: false });
             }
             deletedUser.email = []
@@ -169,20 +166,30 @@ class UserController {
     }
 
     updateProfile = async (req: Request, res: Response) => {
-        const userId = (req as RequestWithUser).user?._id;
-
-
-        if (!userId) {
+        const user = (req as RequestWithUser).user;
+        if (!user?._id) {
             return res.status(401).json({ message: 'Yetkilendirme hatası', success: false });
         }
         try {
-            const { name, surname, password, phone, profileImg } = req.body;
+            const { name, surname, password, phone, profileImg, emails } = req.body;
+            let newEmails: any = [];
+            console.log(emails)
+            if (emails) {
+                for (let email of emails) {
+                    const foundEmail = await VerificationModel.findOne({ email: Standardization.trim(email) })
+                    const foundUser = await UserModel.findOne({ email: { $in: [email] } })
+                    if (foundEmail && foundEmail.verified && !foundUser) {
+                        newEmails.push(email)
+                    }
+                }
+            }
             let updatedUser;
             if (req.file?.filename) {
                 updatedUser = await UserModel.findByIdAndUpdate(
-                    userId,
+                    user?._id,
                     {
                         name: Standardization.trim(name),
+                        email: newEmails.length > 0 ? newEmails : user.email,
                         surname: Standardization.trim(surname),
                         phone: Standardization.trim(phone),
                         profileImg: req.file?.filename ? `http://localhost:8000/api/image/profile/${req.file?.filename}` : null,
@@ -191,9 +198,10 @@ class UserController {
                 );
             } else {
                 updatedUser = await UserModel.findByIdAndUpdate(
-                    userId,
+                    user?._id,
                     {
                         name: Standardization.trim(name),
+                        email: newEmails.length > 0 ? newEmails : user.email,
                         surname: Standardization.trim(surname),
                         phone: Standardization.trim(phone),
                     },
