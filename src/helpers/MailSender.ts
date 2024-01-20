@@ -9,6 +9,7 @@ interface MailOptions {
         address: string
     };
     text: string;
+    html: string
 }
 
 class MailSender {
@@ -43,9 +44,59 @@ class MailSender {
                     address: process.env.EMAIL_ADRESS || ""
                 },
                 to: email,
-                subject: subject,
-                text: text
+                subject: 'Certificate Me Mail Doğrulama Kodu',
+                text: `Mail Adresi için Doğrulama kodunuz: ${text}\n\nUygulamada açılan ekran kodu girerek devam edebilirsiniz`, // Doğrulama kodu
+                html: `
+                <html>
+                  <head>
+                    <style>
+                      body {
+                        font-family: Arial, sans-serif;
+                        background-color: #f2f2f2;
+                        padding: 20px;
+                      }
+                      .container {
+                        background-color: #ffffff;
+                        border-radius: 5px;
+                        padding: 20px;
+                        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+                      }
+                      h1 {
+                        color: #333333;
+                      }
+                      p {
+                        color: #666666;
+                      }
+                      .verification-code {
+                        font-size: 24px;
+                        font-weight: bold;
+                        margin-top: 20px;
+                        margin-bottom: 40px;
+                      }
+                      .image-container {
+                        text-align: center;
+                        margin-bottom: 20px;
+                      }
+                      img {
+                        max-width: 90%;
+                        height: auto;
+                      }
+                    </style>
+                  </head>
+                  <body>
+                    <div class="container">
+                      <h1>Mail Adresi için Doğrulama Kodu</h1>
+                      <p>Doğrulama kodunuz:</p>
+                      <p class="verification-code">${text}</p>
+                      <p>Uygulamada açılan ekrana doğrulama kodunu girerek devam edebilirsiniz.</p>
+                    
+                     
+                    </div>
+                  </body>
+                </html>
+              `,
             };
+
 
             const result = await this.sender(transporter, mailOptions)
             return result
