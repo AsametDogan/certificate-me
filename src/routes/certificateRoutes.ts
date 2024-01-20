@@ -12,8 +12,8 @@ const uploadCertificate = multer({ storage: certificateImgStorage })
 const certificateRouter: Router = Router();
 const certificateController = new CertificateController();
 
-certificateRouter.post('/create', authMiddleware(["1"]), uploadCertificate.single('certificateImg'), certificateController.create);
-certificateRouter.get('/myCreated', authMiddleware(["1"]), certificateController.getMyCreated);
+certificateRouter.post('/', authMiddleware(["1"]), uploadCertificate.single('certificateImg'), certificateController.create);
+certificateRouter.get('/', authMiddleware(["1"]), certificateController.getMyCreated);
 
 
 
